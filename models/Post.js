@@ -7,11 +7,11 @@ class Post extends Model {}
 Post.init(
   {
     title: {
-      type: STRING,
+      type: DataTypes.STRING,
       allowNull: false
     },
     body: {
-      type: STRING,
+      type: DataTypes.STRING,
       allowNull: false
     },
     id: { 
