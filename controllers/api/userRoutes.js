@@ -1,4 +1,3 @@
-
 const router = require('express').Router();
 const { User } = require('../../models');
 //User routes are completed for you so you don't have to deal with setting up authentication
@@ -56,7 +55,6 @@ router.post('/login', async (req, res) => {
     res.status(400).json({ message: 'No user account found!' });
   }
 });
-
 
 // POST /api/users/logout is a logout route for an existing user, 
 //it also destroys the session so the user is no longer logged in

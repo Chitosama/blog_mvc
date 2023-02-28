@@ -6,8 +6,20 @@ class Post extends Model {}
 
 Post.init(
   {
-    title: DataTypes.STRING,
-    body: DataTypes.STRING
+    title: {
+      type: STRING,
+      allowNull: false
+    },
+    body: {
+      type: STRING,
+      allowNull: false
+    },
+    id: { 
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true
+    }
   },
   {
     sequelize,
