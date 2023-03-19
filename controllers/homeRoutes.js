@@ -9,13 +9,54 @@ router.get("/", async (req, res) => {
   // TODO - retrieve all posts from the database
   // render the homepage template with the posts retrieved from the database
   // refer to homepage.handlebars write the code to display the posts
-  res.render("homepage");
+  try {
+    const postData = await Post.findAll({
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: User,
+          attributes: ["username"],
+        },
+      ],
+    });
+    const posts = postData.map((post) => post.get({ plain: true }));
+    console.log(posts); // used for testing
+    res.render("homepage", { posts });
+  } catch (err) {
+    console.log(err); // used for testing
+    res.render("homepage", { posts: [] });
+  }
 });
 
 // TODO - create a GET route for getting a single post with its id
 // this page can be viewed without logging in
-
-
+router.get("/post/:id", async (req, res) => {
+  try {
+    const postData = await Post.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,
+          attributes: ["username"],
+        },
+        {
+          model: Comment,
+          attributes: ["id", "comment_text", "post_id", "user_id", "createdAt"],
+          include: {
+            model: User,
+            attributes: ["username"],
+          },
+        },
+      ],
+    });
+    const post = postData.get({ plain: true });
+    console.log(post); // used for testing
+    res.render("post", { post });
+  }
+  catch (err) {
+    console.log(err); // used for testing
+    res.status(500).json(err);
+  }
+});
 
 // This route renders the login page, which has been completed for you
 router.get("/login", (req, res) => {

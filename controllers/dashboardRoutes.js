@@ -4,14 +4,14 @@
 // All of these routes will be protected by the withAuth middleware function.
 
 const router = require("express").Router();
-const { Post, User } = require("../models/");
+const { Post, User, Comment} = require("../models/");
 const withAuth = require("../utils/auth");
 
 // TODO - create logic for the GET route for / that renders the dashboard homepage
 // It should display all of the posts created by the logged in user
 router.get("/", withAuth, async (req, res) => {
   // TODO - retrieve all posts from the database for the logged in user
-
+try{
   const postData = await Post.findAll({
     where: { userID: req.session.userID, },
     order : [['createdAt', 'DESC']],
@@ -20,14 +20,21 @@ router.get("/", withAuth, async (req, res) => {
         model: User,
         attributes: ["username"],
       },
+      {model: Comment,
+        attributes: [{model: User, attributes: ["username"]}]}
     ],
   });
 
   const posts = postData.map((post) => post.get({ plain: true }));
   // render the dashboard template with the posts retrieved from the database
+
+  // console.log(JSON.stringify(posts), "posts"); // used for testing
   //default layout is set to main.handlebars, layout need to be changed to dashboard to use dashboard.handlebars
-  res.render("admin-all-posts", { layout: "dashboard" });
+  res.render("admin-all-posts", { layout: "dashboard", posts });
   // refer to admin-all-posts.handlebars write the code to display the posts
+} catch (err) {
+  res.redirect("/login").json(err);// trying to handle when not logged in and trying to access dashboard
+}
 });
 
 // TODO - create logic for the GET route for /new that renders the new post page
@@ -56,6 +63,7 @@ router.get("/edit/:id", withAuth, async (req, res) => {
     }
 
     const post = postData.get({ plain: true });
+    // It should display a form for editing an existing post
     // console.log(post); //testing purpose
     res.render("admin-edit-post", { layout: "dashboard", post }); //passing the post data to the template might need to edit for correct handlebars
   }
@@ -64,7 +72,24 @@ router.get("/edit/:id", withAuth, async (req, res) => {
   }
 });
 
-// It should display a form for editing an existing post
+// login for missing create POST handlebars page
+router.get("/create", withAuth, async (req, res) => {
+  res.render("admin-create-post", { layout: "dashboard" });
+});
+
+// //logic for missing POST data
+router.post ("/", withAuth, async (req, res) => {
+  try {
+    const newPost = await Post.create({
+      title: req.body.title,
+      body: req.body.body,
+      userID: req.session.userID,
+    });
+    res.redirect("/dashboard").status(200);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
 
 module.exports = router;
 
